@@ -1,0 +1,43 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Booking {
+  id            String        @id @default(cuid())
+  date          DateTime      @db.Date
+  startHour     Int
+  endHour       Int
+  hours         Int
+  amount        Int           // stored in pence, e.g. 800 = £8.00
+  customerName  String
+  customerEmail String
+  customerPhone String
+  status        BookingStatus @default(PENDING)
+  paymentId     String?       // SumUp checkout ID
+  paymentStatus String?
+  notes         String?
+  isManual      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  @@index([date])
+  @@index([status])
+}
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String   // bcrypt hash
+  name      String
+  createdAt DateTime @default(now())
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+}
