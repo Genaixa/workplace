@@ -85,3 +85,65 @@ h1, h2, h3 {
   opacity: 0.3;
   margin: 16px 0;
 }
+
+/* ── Scroll-reveal animations ── */
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeInLeft {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeInRight {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes zoomIn {
+  from { opacity: 0; transform: scale(0.88); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+.anim-fadeInUp    { animation: fadeInUp    0.75s cubic-bezier(.25,.46,.45,.94) both; }
+.anim-fadeInLeft  { animation: fadeInLeft  0.75s cubic-bezier(.25,.46,.45,.94) both; }
+.anim-fadeInRight { animation: fadeInRight 0.75s cubic-bezier(.25,.46,.45,.94) both; }
+.anim-fadeIn      { animation: fadeIn      0.75s ease both; }
+.anim-zoomIn      { animation: zoomIn      0.75s cubic-bezier(.25,.46,.45,.94) both; }
+
+/* ── Gallery hover zoom ── */
+
+.gallery-img {
+  transition: transform 0.6s ease, opacity 0.6s ease;
+}
+.gallery-img:hover {
+  transform: scale(1.04);
+  opacity: 0.9;
+}
+
+/* ── Header transition ── */
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  transition: background-color 0.35s ease, box-shadow 0.35s ease;
+}
+.site-header.scrolled {
+  background-color: var(--twp-dark) !important;
+  box-shadow: 0 1px 0 rgba(245,240,235,0.08);
+}
+.site-header-logo {
+  transition: height 0.35s ease;
+  height: 48px;
+  width: auto;
+}
+.site-header.scrolled .site-header-logo {
+  height: 36px;
+}

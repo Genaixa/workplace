@@ -1,6 +1,6 @@
 "use client";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const navLinks = [
   { href: "/#about", label: "About" },
@@ -12,18 +12,26 @@ const navLinks = [
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 60);
+    window.addEventListener("scroll", onScroll, { passive: true });
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
     <header
-      style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)" }}
-      className="sticky top-0 z-50"
+      className={`site-header${scrolled ? " scrolled" : ""}`}
+      style={{ color: "var(--twp-cream)" }}
     >
-      <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-6 flex items-center justify-between" style={{ paddingTop: 16, paddingBottom: 16 }}>
         <Link href="/" className="flex-shrink-0">
           <img
             src="https://theworkplaceuk.co.uk/wp-content/uploads/2025/07/twp-logo-white.png"
             alt="The Work Place"
-            className="h-12 w-auto"
+            className="site-header-logo"
           />
         </Link>
 
@@ -57,7 +65,7 @@ export default function Header() {
       {menuOpen && (
         <nav
           className="md:hidden border-t px-6 py-4 flex flex-col gap-4"
-          style={{ borderColor: "rgba(245,240,235,0.2)" }}
+          style={{ borderColor: "rgba(245,240,235,0.2)", backgroundColor: "var(--twp-dark)" }}
         >
           {navLinks.map((link) => (
             <Link

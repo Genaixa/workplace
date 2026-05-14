@@ -45,28 +45,30 @@ function ConfirmContent() {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [id]);
 
+  const topPad = { paddingTop: "120px", paddingBottom: "96px" };
+
   if (error) return (
-    <div className="text-center py-24 px-6">
+    <div className="text-center px-6" style={topPad}>
       <p className="text-red-600 mb-4">{error}</p>
       <Link href="/book" className="btn-primary">Back to Booking</Link>
     </div>
   );
 
   if (!booking) return (
-    <div className="text-center py-24 px-6">
+    <div className="text-center px-6" style={topPad}>
       <p className="opacity-50 text-sm">Checking payment status…</p>
     </div>
   );
 
   if (booking.status === "PENDING") return (
-    <div className="text-center py-24 px-6">
+    <div className="text-center px-6" style={topPad}>
       <div className="inline-block w-8 h-8 border-2 border-current border-t-transparent rounded-full animate-spin mb-6 opacity-40" />
       <p className="text-sm opacity-50">Waiting for payment confirmation…</p>
     </div>
   );
 
   if (booking.status === "CANCELLED") return (
-    <div className="text-center py-24 px-6 max-w-md mx-auto">
+    <div className="text-center px-6 max-w-md mx-auto" style={topPad}>
       <h1 className="text-3xl mb-4" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>Payment not completed</h1>
       <p className="opacity-60 text-sm mb-8">Your booking was not confirmed. No charge has been made.</p>
       <Link href="/book" className="btn-primary">Try Again</Link>
@@ -77,7 +79,7 @@ function ConfirmContent() {
   const endHour = booking.startHour + booking.hours;
 
   return (
-    <div className="max-w-lg mx-auto py-24 px-6 text-center">
+    <div className="max-w-lg mx-auto px-6 text-center" style={{ paddingTop: "120px", paddingBottom: "96px" }}>
       <div
         className="w-14 h-14 rounded-full flex items-center justify-center text-2xl mx-auto mb-8"
         style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)" }}

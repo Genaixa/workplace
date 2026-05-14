@@ -59,8 +59,8 @@ function PayContent() {
 
       <div style={{ backgroundColor: "var(--twp-cream)" }}>
         <div
-          className="py-16 px-6 text-center"
-          style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)" }}
+          className="px-6 text-center"
+          style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "64px" }}
         >
           <p className="text-xs tracking-widest uppercase opacity-50 mb-3">Secure Payment</p>
           <h1 className="text-4xl" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>

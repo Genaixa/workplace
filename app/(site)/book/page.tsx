@@ -142,8 +142,8 @@ export default function BookPage() {
     <div style={{ backgroundColor: "var(--twp-cream)" }}>
       {/* Header banner */}
       <div
-        className="py-16 px-6 text-center"
-        style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)" }}
+        className="px-6 text-center"
+        style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "64px" }}
       >
         <p className="text-xs tracking-widest uppercase opacity-50 mb-3">The Work Place</p>
         <h1 className="text-4xl md:text-6xl" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
