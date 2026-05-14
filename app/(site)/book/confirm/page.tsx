@@ -79,16 +79,24 @@ function ConfirmContent() {
   const endHour = booking.startHour + booking.hours;
 
   return (
-    <div className="max-w-lg mx-auto px-6 text-center" style={{ paddingTop: "120px", paddingBottom: "96px" }}>
+    <div style={{ backgroundColor: "var(--twp-cream)" }}>
       <div
-        className="w-14 h-14 rounded-full flex items-center justify-center text-2xl mx-auto mb-8"
-        style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)" }}
+        className="px-6 text-center"
+        style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "72px" }}
       >
-        ✓
+        <img
+          src="https://theworkplaceuk.co.uk/wp-content/uploads/2025/07/twp-logo-3.png"
+          alt="The Work Place"
+          className="w-16 h-16 object-contain mx-auto mb-6"
+        />
+        <h1 className="text-4xl mb-4" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
+          Booking Confirmed
+        </h1>
+        <div className="divider mx-auto mb-4" />
+        <p className="opacity-50 text-xs tracking-widest uppercase">See you soon</p>
       </div>
-      <h1 className="text-4xl mb-2" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
-        Booking Confirmed
-      </h1>
+
+      <div className="max-w-lg mx-auto px-6 text-center" style={{ paddingTop: "64px", paddingBottom: "96px" }}>
       <p className="opacity-60 text-sm mb-10">
         Hi {booking.customerName} — your desk is booked. A confirmation email is on its way.
       </p>
@@ -121,6 +129,7 @@ function ConfirmContent() {
       </p>
 
       <Link href="/" className="btn-primary">Back to Home</Link>
+      </div>
     </div>
   );
 }

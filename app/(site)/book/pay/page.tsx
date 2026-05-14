@@ -60,12 +60,18 @@ function PayContent() {
       <div style={{ backgroundColor: "var(--twp-cream)" }}>
         <div
           className="px-6 text-center"
-          style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "64px" }}
+          style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "72px" }}
         >
-          <p className="text-xs tracking-widest uppercase opacity-50 mb-3">Secure Payment</p>
-          <h1 className="text-4xl" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
+          <img
+            src="https://theworkplaceuk.co.uk/wp-content/uploads/2025/07/twp-logo-3.png"
+            alt="The Work Place"
+            className="w-16 h-16 object-contain mx-auto mb-6"
+          />
+          <h1 className="text-4xl mb-4" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
             Complete Your Booking
           </h1>
+          <div className="divider mx-auto mb-4" />
+          <p className="opacity-50 text-xs tracking-widest uppercase">Secure payment</p>
         </div>
 
         <div className="max-w-md mx-auto px-6 py-16">

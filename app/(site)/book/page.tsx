@@ -143,14 +143,19 @@ export default function BookPage() {
       {/* Header banner */}
       <div
         className="px-6 text-center"
-        style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "64px" }}
+        style={{ backgroundColor: "var(--twp-dark)", color: "var(--twp-cream)", paddingTop: "120px", paddingBottom: "72px" }}
       >
-        <p className="text-xs tracking-widest uppercase opacity-50 mb-3">The Work Place</p>
-        <h1 className="text-4xl md:text-6xl" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
+        <img
+          src="https://theworkplaceuk.co.uk/wp-content/uploads/2025/07/twp-logo-3.png"
+          alt="The Work Place"
+          className="w-16 h-16 object-contain mx-auto mb-6"
+        />
+        <h1 className="text-4xl md:text-6xl mb-4" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
           Book a Drop-in Desk
         </h1>
-        <p className="mt-4 opacity-60 text-sm">
-          12 desks available · Pay securely online · Confirmation by email
+        <div className="divider mx-auto mb-4" />
+        <p className="opacity-50 text-xs tracking-widest uppercase">
+          12 desks · secure payment · email confirmation
         </p>
       </div>
 
