@@ -36,12 +36,19 @@ export default function BookPage() {
   const [hours, setHours] = useState(1);
   const [step, setStep] = useState<"pick" | "details" | "processing">("pick");
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
+  const [promoInput, setPromoInput] = useState("");
+  const [promo, setPromo] = useState<{ code: string; discountHours: number; discountPence: number; finalPence: number } | null>(null);
+  const [promoError, setPromoError] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
 
   const fetchSlots = useCallback(async (date: Date) => {
     setLoadingSlots(true);
     setStartHour(null);
+    setPromo(null);
+    setPromoInput("");
+    setPromoError("");
     try {
       const res = await fetch(`/api/availability?date=${toDateString(date)}`);
       const data = await res.json();
@@ -68,7 +75,32 @@ export default function BookPage() {
       return slot && slot.available > 0;
     });
 
-  const price = calculatePrice(hours);
+  const basePrice = calculatePrice(hours);
+  const price = promo ? promo.finalPence : basePrice;
+
+  async function applyPromo() {
+    if (!promoInput.trim()) return;
+    setPromoLoading(true);
+    setPromoError("");
+    setPromo(null);
+    try {
+      const res = await fetch("/api/promo/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoInput.trim(), hours }),
+      });
+      const data = await res.json();
+      if (data.valid) {
+        setPromo(data);
+      } else {
+        setPromoError(data.error || "Invalid promo code");
+      }
+    } catch {
+      setPromoError("Could not validate code. Please try again.");
+    } finally {
+      setPromoLoading(false);
+    }
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -87,6 +119,7 @@ export default function BookPage() {
           customerName: form.name,
           customerEmail: form.email,
           customerPhone: form.phone,
+          promoCode: promo?.code ?? null,
         }),
       });
 
@@ -303,6 +336,58 @@ export default function BookPage() {
               ))}
             </div>
 
+            {/* Promo code */}
+            <div className="border p-5" style={{ borderColor: "rgba(26,26,26,0.12)" }}>
+              <p className="text-xs tracking-widest uppercase opacity-50 mb-3">Promo Code</p>
+              {promo ? (
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="text-sm">
+                    <span className="font-medium">{promo.code}</span>
+                    <span className="opacity-60 ml-2">— {promo.discountHours} hour{promo.discountHours > 1 ? "s" : ""} free (−{formatPrice(promo.discountPence)})</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => { setPromo(null); setPromoInput(""); }}
+                    className="text-xs opacity-50 hover:opacity-80 underline"
+                  >
+                    Remove
+                  </button>
+                </div>
+              ) : (
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={promoInput}
+                    onChange={(e) => { setPromoInput(e.target.value.toUpperCase()); setPromoError(""); }}
+                    onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); applyPromo(); } }}
+                    placeholder="Enter code"
+                    className="flex-1 border-b pb-2 text-sm bg-transparent outline-none uppercase tracking-widest"
+                    style={{ borderColor: "rgba(26,26,26,0.25)" }}
+                  />
+                  <button
+                    type="button"
+                    onClick={applyPromo}
+                    disabled={promoLoading || !promoInput.trim()}
+                    className="text-xs tracking-widest uppercase opacity-60 hover:opacity-100 disabled:opacity-30"
+                  >
+                    {promoLoading ? "…" : "Apply"}
+                  </button>
+                </div>
+              )}
+              {promoError && <p className="text-red-600 text-xs mt-2">{promoError}</p>}
+            </div>
+
+            {/* Price summary */}
+            {promo && (
+              <div className="text-right text-sm space-y-1">
+                <p className="opacity-50">Original: <span className="line-through">{formatPrice(basePrice)}</span></p>
+                <p className="opacity-50">Discount: −{formatPrice(promo.discountPence)}</p>
+                <p className="text-lg font-medium" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>
+                  Total: {price === 0 ? "Free" : formatPrice(price)}
+                </p>
+              </div>
+            )}
+
             <p className="text-xs opacity-40 mb-6">
               By booking you agree to our cancellation policy: contact us at least 2 hours before your start time to amend or cancel. Refunds are processed offline.
             </p>
@@ -316,7 +401,11 @@ export default function BookPage() {
               disabled={submitting}
               className="btn-primary w-full text-center disabled:opacity-50"
             >
-              {submitting ? "Redirecting to payment…" : `Pay ${formatPrice(price)} securely`}
+              {submitting
+                ? "Processing…"
+                : price === 0
+                ? "Confirm Free Booking"
+                : `Pay ${formatPrice(price)} securely`}
             </button>
 
             <p className="text-xs opacity-40 text-center mt-4">

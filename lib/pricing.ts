@@ -19,6 +19,10 @@ export const PRICE_TABLE = [
   { hours: 4, label: "4+ hours (Day Pass)", pence: 1500 },
 ];
 
+export function applyPromoDiscount(bookingHours: number, discountHours: number): number {
+  return Math.max(0, calculatePrice(bookingHours) - calculatePrice(discountHours));
+}
+
 export const MAX_DESKS = 12;
 export const OPENING_HOUR = 8;   // 8am
 export const CLOSING_HOUR = 22;  // 10pm last start slot (so booking ends by 11pm max if 1hr)

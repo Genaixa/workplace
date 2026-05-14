@@ -1,6 +1,16 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
-import { formatPrice } from "@/lib/pricing";
+import { formatPrice, calculatePrice } from "@/lib/pricing";
+
+type PromoCode = {
+  code: string;
+  discountHours: number;
+  expiresAt: string | null;
+  usageLimit: number | null;
+  usedCount: number;
+  active: boolean;
+  createdAt: string;
+};
 
 type Booking = {
   id: string;
@@ -35,8 +45,11 @@ export default function AdminDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [slots, setSlots] = useState<Slot[]>([]);
   const [loading, setLoading] = useState(false);
-  const [view, setView] = useState<"dashboard" | "manual" | "edit">("dashboard");
+  const [view, setView] = useState<"dashboard" | "manual" | "edit" | "promo">("dashboard");
   const [editBooking, setEditBooking] = useState<Booking | null>(null);
+  const [promos, setPromos] = useState<PromoCode[]>([]);
+  const [promoForm, setPromoForm] = useState({ code: "", discountHours: 1, expiresAt: "" });
+  const [promoError, setPromoError] = useState("");
   const [manualForm, setManualForm] = useState({
     date: new Date().toISOString().slice(0, 10),
     startHour: 9,
@@ -88,6 +101,42 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (authed) fetchData();
   }, [authed, fetchData]);
+
+  const fetchPromos = useCallback(async () => {
+    const res = await fetch("/api/admin/promo");
+    if (res.ok) setPromos(await res.json());
+  }, []);
+
+  useEffect(() => {
+    if (authed && view === "promo") fetchPromos();
+  }, [authed, view, fetchPromos]);
+
+  async function deactivatePromo(code: string) {
+    if (!confirm(`Deactivate code "${code}"?`)) return;
+    await fetch(`/api/admin/promo/${encodeURIComponent(code)}`, { method: "DELETE" });
+    fetchPromos();
+  }
+
+  async function handlePromoSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setPromoError("");
+    const res = await fetch("/api/admin/promo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        code: promoForm.code,
+        discountHours: promoForm.discountHours,
+        expiresAt: promoForm.expiresAt || null,
+      }),
+    });
+    if (res.ok) {
+      setPromoForm({ code: "", discountHours: 1, expiresAt: "" });
+      fetchPromos();
+    } else {
+      const d = await res.json();
+      setPromoError(d.error || "Failed to create code");
+    }
+  }
 
   async function cancelBooking(id: string) {
     if (!confirm("Cancel this booking?")) return;
@@ -204,6 +253,12 @@ export default function AdminDashboard() {
               className="text-xs tracking-widest uppercase opacity-60 hover:opacity-100 transition-opacity"
             >
               + Manual Booking
+            </button>
+            <button
+              onClick={() => { setView("promo"); setPromoError(""); }}
+              className="text-xs tracking-widest uppercase opacity-60 hover:opacity-100 transition-opacity"
+            >
+              Promo Codes
             </button>
           </div>
         </div>
@@ -402,6 +457,102 @@ export default function AdminDashboard() {
               {actionError && <p className="text-red-600 text-sm">{actionError}</p>}
               <button type="submit" className="btn-primary self-start mt-2">Add Booking</button>
             </form>
+          </div>
+        )}
+
+        {view === "promo" && (
+          <div>
+            <button onClick={() => setView("dashboard")} className="text-xs tracking-widest uppercase opacity-50 hover:opacity-80 mb-8 flex items-center gap-2">
+              ← Back
+            </button>
+            <h2 className="text-2xl mb-8" style={{ fontFamily: "Canela, Georgia, serif", fontWeight: 100 }}>Promo Codes</h2>
+
+            {/* Create form */}
+            <div className="max-w-lg mb-12">
+              <h3 className="text-xs tracking-widest uppercase opacity-50 mb-5">Create New Code</h3>
+              <form onSubmit={handlePromoSubmit} className="flex flex-col gap-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-xs tracking-widest uppercase opacity-50 mb-2">Code</label>
+                    <input
+                      type="text"
+                      value={promoForm.code}
+                      onChange={(e) => setPromoForm({ ...promoForm, code: e.target.value.toUpperCase().replace(/\s+/g, "") })}
+                      placeholder="e.g. WELCOME1"
+                      required
+                      className="w-full border-b pb-2 text-sm bg-transparent outline-none uppercase tracking-widest"
+                      style={{ borderColor: "rgba(26,26,26,0.25)" }}
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-xs tracking-widest uppercase opacity-50 mb-2">Free Hours</label>
+                    <select
+                      value={promoForm.discountHours}
+                      onChange={(e) => setPromoForm({ ...promoForm, discountHours: parseInt(e.target.value) })}
+                      className="w-full border-b pb-2 text-sm bg-transparent outline-none"
+                      style={{ borderColor: "rgba(26,26,26,0.25)" }}
+                    >
+                      {[1, 2, 3, 4].map((h) => (
+                        <option key={h} value={h}>{h === 4 ? "4 hours (Day Pass)" : `${h} hour${h > 1 ? "s" : ""} free`}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs tracking-widest uppercase opacity-50 mb-2">Expires On (optional)</label>
+                  <input
+                    type="date"
+                    value={promoForm.expiresAt}
+                    onChange={(e) => setPromoForm({ ...promoForm, expiresAt: e.target.value })}
+                    className="w-full border-b pb-2 text-sm bg-transparent outline-none"
+                    style={{ borderColor: "rgba(26,26,26,0.25)" }}
+                  />
+                </div>
+                {promoError && <p className="text-red-600 text-sm">{promoError}</p>}
+                <button type="submit" className="btn-primary self-start mt-2">Create Code</button>
+              </form>
+            </div>
+
+            {/* Codes table */}
+            <h3 className="text-xs tracking-widest uppercase opacity-50 mb-4">All Codes</h3>
+            {promos.length === 0 ? (
+              <p className="text-sm opacity-40">No promo codes yet.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b" style={{ borderColor: "rgba(26,26,26,0.15)" }}>
+                      {["Code", "Free Hours", "Discount", "Expires", "Used", "Status", ""].map((h) => (
+                        <th key={h} className="text-left py-3 px-2 text-xs tracking-widest uppercase opacity-40 font-normal">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {promos.map((p) => (
+                      <tr key={p.code} className="border-b" style={{ borderColor: "rgba(26,26,26,0.08)", opacity: p.active ? 1 : 0.4 }}>
+                        <td className="py-3 px-2 font-medium tracking-wider">{p.code}</td>
+                        <td className="py-3 px-2">{p.discountHours}h free</td>
+                        <td className="py-3 px-2">{formatPrice(calculatePrice(p.discountHours))}</td>
+                        <td className="py-3 px-2 text-xs opacity-60">{p.expiresAt ? new Date(p.expiresAt).toLocaleDateString("en-GB") : "Never"}</td>
+                        <td className="py-3 px-2">{p.usedCount === 0 ? "Not yet used" : "Used"}</td>
+                        <td className="py-3 px-2">
+                          <span className="text-xs px-2 py-1" style={{ backgroundColor: p.active ? "rgba(74,92,74,0.15)" : "rgba(192,57,43,0.1)" }}>
+                            {p.active ? "Active" : "Inactive"}
+                          </span>
+                        </td>
+                        <td className="py-3 px-2">
+                          {p.active && (
+                            <button onClick={() => deactivatePromo(p.code)} className="text-xs text-red-600 opacity-70 hover:opacity-100">
+                              Deactivate
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 
